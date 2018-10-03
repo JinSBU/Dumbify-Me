@@ -18,8 +18,8 @@ public class DiscordBot extends ListenerAdapter {
 
     static ChromeOptions options;
     static WebDriver driver;
-    static String email = "";
-    static String password = "";
+    static String email = "INSERT EMAIL HERE";
+    static String password = "INSERT PASSWORD HERE";
     @Override
     public void onMessageReceived(MessageReceivedEvent event){
         if(event.getAuthor().isBot()){
@@ -69,7 +69,7 @@ public class DiscordBot extends ListenerAdapter {
     }
     public static String getAnswer(WebDriver driver, String cheggLink) throws InterruptedException {
         String pageSource, returnValue = "";
-        driver.navigate().to("https://textsheet.com/");
+        driver.navigate().to("INSERT SITE HERE");
         sleep(2000);
         ((JavascriptExecutor)driver).executeScript("window.open();");
         String parentHandle = driver.getWindowHandle(); // get the current window handle
