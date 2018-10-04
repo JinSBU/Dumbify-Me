@@ -31,22 +31,35 @@ public class DiscordBot extends ListenerAdapter {
             String cheggLink = messageContents[1];
             String answer = null;
             try {
+                event.getChannel().sendMessage("Fetching your answer...").queue();
                 answer = getAnswer(driver, cheggLink);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            event.getChannel().sendMessage(answer).queue();
+            if(answer.length() > 2000){
+                int i = 0;
+                while(i < answer.length()){
+                    if(i > answer.length()){
+                        i = answer.length();
+                    }
+                    String content = answer.substring(i, i+2000);
+                    event.getChannel().sendMessage(content).queue();
+                    i+=2000;
+                }
+            }
+            else{
+                event.getChannel().sendMessage(answer).queue();
+            }
+
         }
     };
 
     public static void main(String[] args) throws InterruptedException, LoginException {
         options = new ChromeOptions();
+        options.addArguments("--start-maximized", "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36");
+
         options.setExperimentalOption("useAutomationExtension", false);
         options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-
-//        options.addArguments("headless");
-        options.addArguments("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36");
-
 
         System.setProperty("webdriver.chrome.driver", "C:/Users/jinth/IdeaProjects/Flight-Price-Checker/chromedriver.exe");
         driver = new ChromeDriver(options);
@@ -58,7 +71,7 @@ public class DiscordBot extends ListenerAdapter {
         sleep(2000);
         WebElement emailBox = driver.findElement(By.id("identifierId"));
         emailBox.sendKeys(email, Keys.ENTER);
-        sleep(2000);
+        sleep(3000);
         WebElement passwordBox = driver.findElement(By.name("password"));
         passwordBox.sendKeys(password, Keys.ENTER);
         sleep(2000);
@@ -69,7 +82,7 @@ public class DiscordBot extends ListenerAdapter {
     }
     public static String getAnswer(WebDriver driver, String cheggLink) throws InterruptedException {
         String pageSource, returnValue = "";
-        driver.navigate().to("https://textsheet.com/");
+        driver.navigate().to("");
         sleep(2000);
         ((JavascriptExecutor)driver).executeScript("window.open();");
         String parentHandle = driver.getWindowHandle(); // get the current window handle
@@ -81,6 +94,7 @@ public class DiscordBot extends ListenerAdapter {
         sleep(500);
         WebElement searchBox = driver.findElement(By.id("search"));
         searchBox.sendKeys(cheggLink, Keys.chord(Keys.CONTROL, "a"), Keys.chord(Keys.CONTROL, "c"));
+        driver.close();
         driver.switchTo().window(parentHandle);
 
 
@@ -115,10 +129,10 @@ public class DiscordBot extends ListenerAdapter {
 
         //Removes majority of the tags.
         String removedTags = removedHeader.replaceAll("<p>","").replaceAll("</p>", "").replaceAll(
-                "<img alt=\"\">", "").replaceAll(" src=", "").replaceAll("/>", "");
+                "<img alt=\"\">", "").replaceAll(" src=", "").replaceAll("/>", "").replaceAll("<div id=\"content\">","")
+                .replaceAll("img alt=\"\"\"", "").replaceAll("\"", "").replaceAll("style=\"height:[^0-9]*px;width:[^0-9]*px;", "").replaceAll("<//", "");
 
         String result = removedTags.substring(0, removedTags.indexOf("</div>"));
-        System.out.println(result);
         return result;
     }
 }
